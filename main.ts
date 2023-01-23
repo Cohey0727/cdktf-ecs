@@ -1,16 +1,11 @@
-// Copyright (c) HashiCorp, Inc
-// SPDX-License-Identifier: MPL-2.0
-import { Construct } from "constructs";
-import { App, TerraformStack } from "cdktf";
+import { App } from "cdktf";
+import MainStack from "./stacks/main";
 
-class MyStack extends TerraformStack {
-  constructor(scope: Construct, id: string) {
-    super(scope, id);
-
-    // define resources here
-  }
+const envName = process.env.STAGE;
+if (!envName) {
+  throw new Error("STAGE is not set");
 }
 
 const app = new App();
-new MyStack(app, "sample");
+new MainStack(app, `${envName}-ecs`);
 app.synth();
