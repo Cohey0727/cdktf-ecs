@@ -21,6 +21,7 @@ class NetworkStack {
       tags: {
         Name: vpcName,
       },
+      enableDnsHostnames: true,
     });
 
     const privateSubnetCount = 2;

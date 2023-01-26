@@ -14,7 +14,7 @@ type EcsStackProps = {
 class EcsStack {
   readonly scope: TerraformStack;
   readonly cluster: aws.ecsCluster.EcsCluster;
-  // readonly service: aws.ecsService.EcsService;
+  readonly service: aws.ecsService.EcsService;
   readonly executionRole: aws.iamRole.IamRole;
   readonly taskDefinition: aws.ecsTaskDefinition.EcsTaskDefinition;
 
@@ -81,23 +81,23 @@ class EcsStack {
       }
     );
 
-    // this.service = new aws.ecsService.EcsService(scope, "EcsService", {
-    //   name: `${name}-service`,
-    //   cluster: this.cluster.arn,
-    //   taskDefinition: this.taskDefinition.arn,
-    //   desiredCount: 1,
-    //   launchType: "FARGATE",
-    //   deploymentMaximumPercent: 100,
-    //   deploymentMinimumHealthyPercent: 0,
-    //   networkConfiguration: {
-    //     subnets: network.publicSubnets.map((subnet) => subnet.id),
-    //     assignPublicIp: true,
-    //   },
-    //   tags: {
-    //     Name: `${name}-service`,
-    //     Stack: name,
-    //   },
-    // });
+    this.service = new aws.ecsService.EcsService(scope, "EcsService", {
+      name: `${name}-service`,
+      cluster: this.cluster.arn,
+      taskDefinition: this.taskDefinition.arn,
+      desiredCount: 1,
+      launchType: "FARGATE",
+      deploymentMaximumPercent: 100,
+      deploymentMinimumHealthyPercent: 0,
+      networkConfiguration: {
+        subnets: network.publicSubnets.map((subnet) => subnet.id),
+        assignPublicIp: true,
+      },
+      tags: {
+        Name: `${name}-service`,
+        Stack: name,
+      },
+    });
   }
 }
 
