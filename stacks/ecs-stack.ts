@@ -10,7 +10,7 @@ type EcsStackProps = {
 class EcsStack {
   readonly scope: TerraformStack;
   readonly cluster: aws.ecsCluster.EcsCluster;
-  // readonly service: aws.ecsService.EcsService;
+  readonly service: aws.ecsService.EcsService;
   readonly executionRole: aws.iamRole.IamRole;
   readonly taskDefinition: aws.ecsTaskDefinition.EcsTaskDefinition;
 
@@ -18,6 +18,10 @@ class EcsStack {
     this.scope = scope;
     this.cluster = new aws.ecsCluster.EcsCluster(scope, "EcsCluster", {
       name: `${name}-cluster`,
+      tags: {
+        Name: `${name}-cluster`,
+        Stack: name,
+      },
     });
 
     const assumeRolePolicy = fs.readFileSync(
@@ -55,10 +59,14 @@ class EcsStack {
         cpu: "256",
         memory: "512",
         executionRoleArn: this.executionRole.arn,
+        tags: {
+          Name: `${name}-task-definition`,
+          Stack: name,
+        },
       }
     );
 
-    new aws.ecsService.EcsService(scope, "EcsService", {
+    this.service = new aws.ecsService.EcsService(scope, "EcsService", {
       name: `${name}-service`,
       cluster: this.cluster.arn,
       taskDefinition: this.taskDefinition.arn,
@@ -66,11 +74,14 @@ class EcsStack {
       launchType: "FARGATE",
       deploymentMaximumPercent: 100,
       deploymentMinimumHealthyPercent: 0,
-      // networkConfiguration: {
-      //   subnets: props.network.publicSubnets.map((subnet) => subnet.id),
-      //   assignPublicIp: true,
-      // },
-      // loadBalancer: [],
+      networkConfiguration: {
+        subnets: props.network.publicSubnets.map((subnet) => subnet.id),
+        assignPublicIp: true,
+      },
+      tags: {
+        Name: `${name}-service`,
+        Stack: name,
+      },
     });
   }
 }
