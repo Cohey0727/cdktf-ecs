@@ -10,6 +10,8 @@ class DatabaseStack {
   readonly scope: TerraformStack;
   readonly cluster: aws.rdsCluster.RdsCluster;
   readonly parameterGroup: aws.rdsClusterParameterGroup.RdsClusterParameterGroup;
+  static readonly databaseEngin = "aurora-mysql";
+  static readonly engineVersion = "5.7.mysql_aurora.2.10.2";
 
   constructor(scope: TerraformStack, name: string, props: DatabaseStackProps) {
     this.scope = scope;
@@ -49,15 +51,12 @@ class DatabaseStack {
     );
 
     const clusterIdentifier = `${name}-cluster`;
-    const databaseEngin = "aurora-mysql";
-    const engineVersion = "5.7.mysql_aurora.2.10.2";
-
     this.parameterGroup =
       new aws.rdsClusterParameterGroup.RdsClusterParameterGroup(
         scope,
-        "RdsClusterParameterGroup",
+        "ClusterParameterGroup",
         {
-          name: `${name}-parameter-group`,
+          name: `${name}-cluster-parameter-group`,
           family: "aurora-mysql5.7",
           parameter: [
             {
@@ -76,8 +75,8 @@ class DatabaseStack {
 
     this.cluster = new aws.rdsCluster.RdsCluster(this.scope, "RdsCluster", {
       clusterIdentifier,
-      engine: databaseEngin,
-      engineVersion,
+      engine: DatabaseStack.databaseEngin,
+      engineVersion: DatabaseStack.engineVersion,
       dbSubnetGroupName: dbSubnetGroup.name,
       vpcSecurityGroupIds: [dbSecurityGroup.id],
       masterUsername: process.env.DATABASE_MASTER_USER!,
@@ -95,9 +94,10 @@ class DatabaseStack {
       {
         identifier: `${name}-cluster-instance`,
         clusterIdentifier: this.cluster.clusterIdentifier,
-        engine: databaseEngin,
+        engine: DatabaseStack.databaseEngin,
         instanceClass: "db.t3.small",
         publiclyAccessible: true,
+        dbParameterGroupName: "default.aurora-mysql5.7",
       }
     );
   }
