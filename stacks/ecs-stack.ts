@@ -3,22 +3,24 @@ import EcrStack from "./ecr-stack";
 import NetworkStack from "./network-stack";
 import * as aws from "@cdktf/provider-aws";
 import * as fs from "fs";
+import DatabaseStack from "./database-stack";
 
 type EcsStackProps = {
   network: NetworkStack;
   ecr: EcrStack;
+  database: DatabaseStack;
 };
 
 class EcsStack {
   readonly scope: TerraformStack;
   readonly cluster: aws.ecsCluster.EcsCluster;
-  readonly service: aws.ecsService.EcsService;
+  // readonly service: aws.ecsService.EcsService;
   readonly executionRole: aws.iamRole.IamRole;
   readonly taskDefinition: aws.ecsTaskDefinition.EcsTaskDefinition;
 
   constructor(scope: TerraformStack, name: string, props: EcsStackProps) {
     this.scope = scope;
-    const { network, ecr } = props;
+    const { network, ecr, database } = props;
     this.cluster = new aws.ecsCluster.EcsCluster(scope, "EcsCluster", {
       name: `${name}-cluster`,
       tags: {
@@ -49,7 +51,13 @@ class EcsStack {
     );
     const containerDefinitions = fs
       .readFileSync("stacks/container-definitions.json", "utf8")
-      .replaceAll("{{log-group}}", logGroup.name);
+      .replaceAll("{{log-group}}", logGroup.name)
+      .replaceAll("{{image-url}}", `${ecr.repository.repositoryUrl}:latest`)
+      .replaceAll("{{database-host}}", database.cluster.endpoint)
+      .replaceAll("{{database-password}}", database.cluster.masterPassword)
+      .replaceAll("{{database-user}}", database.cluster.masterUsername)
+      .replaceAll("{{database-port}}", `${database.cluster.port}`)
+      .replaceAll("{{database-schema}}", `${database.cluster.databaseName}`);
 
     this.taskDefinition = new aws.ecsTaskDefinition.EcsTaskDefinition(
       scope,
@@ -66,26 +74,30 @@ class EcsStack {
           Name: `${name}-task-definition`,
           Stack: name,
         },
+        runtimePlatform: {
+          operatingSystemFamily: "LINUX",
+          cpuArchitecture: "ARM64",
+        },
       }
     );
 
-    this.service = new aws.ecsService.EcsService(scope, "EcsService", {
-      name: `${name}-service`,
-      cluster: this.cluster.arn,
-      taskDefinition: this.taskDefinition.arn,
-      desiredCount: 1,
-      launchType: "FARGATE",
-      deploymentMaximumPercent: 100,
-      deploymentMinimumHealthyPercent: 0,
-      networkConfiguration: {
-        subnets: network.publicSubnets.map((subnet) => subnet.id),
-        assignPublicIp: true,
-      },
-      tags: {
-        Name: `${name}-service`,
-        Stack: name,
-      },
-    });
+    // this.service = new aws.ecsService.EcsService(scope, "EcsService", {
+    //   name: `${name}-service`,
+    //   cluster: this.cluster.arn,
+    //   taskDefinition: this.taskDefinition.arn,
+    //   desiredCount: 1,
+    //   launchType: "FARGATE",
+    //   deploymentMaximumPercent: 100,
+    //   deploymentMinimumHealthyPercent: 0,
+    //   networkConfiguration: {
+    //     subnets: network.publicSubnets.map((subnet) => subnet.id),
+    //     assignPublicIp: true,
+    //   },
+    //   tags: {
+    //     Name: `${name}-service`,
+    //     Stack: name,
+    //   },
+    // });
   }
 }
 

@@ -6,6 +6,7 @@ import { DataAwsCallerIdentity } from "@cdktf/provider-aws/lib/data-aws-caller-i
 import NetworkStack from "./network-stack";
 import EcsStack from "./ecs-stack";
 import EcrStack from "./ecr-stack";
+import DatabaseStack from "./database-stack";
 
 const s3 = aws.s3Bucket;
 
@@ -22,8 +23,9 @@ class MainStack extends TerraformStack {
     });
 
     const network = new NetworkStack(this, name);
+    const database = new DatabaseStack(this, name, { network });
     const ecr = new EcrStack(this, name, {});
-    new EcsStack(this, name, { network, ecr });
+    new EcsStack(this, name, { network, database, ecr });
 
     // new EcsStack(this, name);
     createOutput(this, {

@@ -1,11 +1,8 @@
 [
   {
-    "command": [
-      "/bin/sh -c \"echo '<html> <head> <title>Amazon ECS Sample App</title> <style>body {margin-top: 40px; background-color: #333;} </style> </head><body> <div style=color:white;text-align:center> <h1>Amazon ECS Sample App</h1> <h2>Congratulations!</h2> <p>Your application is now running on a container in Amazon ECS.</p> </div></body></html>' >  /usr/local/apache2/htdocs/index.html && httpd-foreground\""
-    ],
-    "entryPoint": ["sh", "-c"],
+    "command": ["poetry", "run", "start"],
     "essential": true,
-    "image": "httpd:2.4",
+    "image": "{{image-url}}",
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
@@ -15,12 +12,34 @@
         "awslogs-create-group": "true"
       }
     },
-    "name": "sample-fargate-app",
+    "name": "ecs-fargate-app",
     "portMappings": [
       {
         "containerPort": 80,
         "hostPort": 80,
         "protocol": "tcp"
+      }
+    ],
+    "environment": [
+      {
+        "value": "{{database-host}}",
+        "name": "DATABASE_HOST"
+      },
+      {
+        "value": "{{database-port}}",
+        "name": "DATABASE_PORT"
+      },
+      {
+        "value": "{{database-user}}",
+        "name": "DATABASE_USER"
+      },
+      {
+        "value": "{{database-password}}",
+        "name": "DATABASE_PASSWORD"
+      },
+      {
+        "value": "{{database-schema}}",
+        "name": "DATABASE_SCHEMA"
       }
     ]
   }

@@ -3,6 +3,11 @@ import { TerraformStack } from "cdktf";
 import * as aws from "@cdktf/provider-aws";
 
 class NetworkStack {
+  static readonly availabilityZones = [
+    "ap-northeast-1a",
+    "ap-northeast-1c",
+    "ap-northeast-1d",
+  ];
   readonly scope: TerraformStack;
   readonly vpc: aws.vpc.Vpc;
   readonly privateSubnets: aws.subnet.Subnet[];
@@ -22,9 +27,14 @@ class NetworkStack {
     this.privateSubnets = [...Array(privateSubnetCount).keys()].map((index) => {
       const logicId = `PrivateSubnet-${index}`;
       const subnetName = `${name}-private-subnet-${index}`;
+      const availabilityZone =
+        NetworkStack.availabilityZones[
+          index % NetworkStack.availabilityZones.length
+        ];
       return new aws.subnet.Subnet(scope, logicId, {
         cidrBlock: `10.0.${index}.0/24`,
         vpcId: this.vpc.id,
+        availabilityZone,
         tags: {
           Name: subnetName,
         },
@@ -35,9 +45,14 @@ class NetworkStack {
     this.publicSubnets = [...Array(publicSubnetCount).keys()].map((index) => {
       const logicId = `PublicSubnet-${index}`;
       const subnetName = `${name}-public-subnet-${index}`;
+      const availabilityZone =
+        NetworkStack.availabilityZones[
+          index % NetworkStack.availabilityZones.length
+        ];
       return new aws.subnet.Subnet(scope, logicId, {
         cidrBlock: `10.0.${index + 16}.0/24`,
         vpcId: this.vpc.id,
+        availabilityZone,
         tags: {
           Name: subnetName,
         },
