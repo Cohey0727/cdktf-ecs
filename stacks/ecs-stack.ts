@@ -1,10 +1,12 @@
 import { TerraformStack } from "cdktf";
+import EcrStack from "./ecr-stack";
 import NetworkStack from "./network-stack";
 import * as aws from "@cdktf/provider-aws";
 import * as fs from "fs";
 
 type EcsStackProps = {
   network: NetworkStack;
+  ecr: EcrStack;
 };
 
 class EcsStack {
@@ -16,6 +18,7 @@ class EcsStack {
 
   constructor(scope: TerraformStack, name: string, props: EcsStackProps) {
     this.scope = scope;
+    const { network, ecr } = props;
     this.cluster = new aws.ecsCluster.EcsCluster(scope, "EcsCluster", {
       name: `${name}-cluster`,
       tags: {
@@ -75,7 +78,7 @@ class EcsStack {
       deploymentMaximumPercent: 100,
       deploymentMinimumHealthyPercent: 0,
       networkConfiguration: {
-        subnets: props.network.publicSubnets.map((subnet) => subnet.id),
+        subnets: network.publicSubnets.map((subnet) => subnet.id),
         assignPublicIp: true,
       },
       tags: {

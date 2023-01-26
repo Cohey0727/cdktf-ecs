@@ -23,7 +23,7 @@ class MainStack extends TerraformStack {
 
     const network = new NetworkStack(this, name);
     const ecr = new EcrStack(this, name, {});
-    new EcsStack(this, name, { network });
+    new EcsStack(this, name, { network, ecr });
 
     // new EcsStack(this, name);
     createOutput(this, {
