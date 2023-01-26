@@ -1,11 +1,11 @@
 import { App } from "cdktf";
-import MainStack from "./stacks/main";
+import MainStack from "./stacks";
 
-const envName = process.env.STAGE;
-if (!envName) {
+const stageName = process.env.STAGE;
+if (!stageName) {
   throw new Error("STAGE is not set");
 }
 
 const app = new App();
-new MainStack(app, `${envName}-ecs`);
+new MainStack(app, `${stageName}-ecs`);
 app.synth();
