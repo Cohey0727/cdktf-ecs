@@ -19,9 +19,9 @@
 | cdktf provider                        | A set of subcommands that facilitates provider management                        |
 | cdktf completion                      | generate completion script                                                       |
 
-## Environment
+## Environment Variables
 
-| Environment Variables    | Description                                |
+| Name                     | Description                                |
 | ------------------------ | ------------------------------------------ |
 | APP_STAGE                | stage name(e.g. production, staging, ... ) |
 | DATABASE_MASTER_USER     | database username                          |
