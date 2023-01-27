@@ -18,3 +18,12 @@
 | cdktf debug                           | Get debug information about the current project and environment                  |
 | cdktf provider                        | A set of subcommands that facilitates provider management                        |
 | cdktf completion                      | generate completion script                                                       |
+
+## Environment
+
+| Environment Variables    | Description                                |
+| ------------------------ | ------------------------------------------ |
+| APP_STAGE                | stage name(e.g. production, staging, ... ) |
+| DATABASE_MASTER_USER     | database username                          |
+| DATABASE_MASTER_PASSWORD | database password                          |
+| DATABASE_NAME            | database default schema                    |
