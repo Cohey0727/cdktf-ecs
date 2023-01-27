@@ -26,8 +26,6 @@ class MainStack extends TerraformStack {
     const database = new DatabaseStack(this, name, { network });
     const ecr = new EcrStack(this, name, {});
     new EcsStack(this, name, { network, database, ecr });
-
-    // new EcsStack(this, name);
     createOutput(this, {
       aws_account_id: awsData.accountId,
       vpc_id: network.vpc.id,

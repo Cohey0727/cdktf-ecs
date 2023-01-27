@@ -86,6 +86,7 @@ class DatabaseStack {
       applyImmediately: true,
       dbClusterParameterGroupName: this.parameterGroup.name,
       dbInstanceParameterGroupName: this.parameterGroup.name,
+      tags: { Name: clusterIdentifier, Stack: name },
     });
 
     new aws.rdsClusterInstance.RdsClusterInstance(

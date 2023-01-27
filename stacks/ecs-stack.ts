@@ -21,12 +21,11 @@ class EcsStack {
   constructor(scope: TerraformStack, name: string, props: EcsStackProps) {
     this.scope = scope;
     const { network, ecr, database } = props;
+
+    const clusterName = `${name}-cluster`;
     this.cluster = new aws.ecsCluster.EcsCluster(scope, "EcsCluster", {
-      name: `${name}-cluster`,
-      tags: {
-        Name: `${name}-cluster`,
-        Stack: name,
-      },
+      name: clusterName,
+      tags: { Name: clusterName, Stack: name },
     });
 
     const assumeRolePolicy = fs.readFileSync(
@@ -45,9 +44,7 @@ class EcsStack {
     const logGroup = new aws.cloudwatchLogGroup.CloudwatchLogGroup(
       scope,
       "LogGroup",
-      {
-        name: `/ecs/logs/${name}`,
-      }
+      { name: `/ecs/logs/${name}` }
     );
     const containerDefinitions = fs
       .readFileSync("stacks/container-definitions.json", "utf8")
@@ -59,30 +56,29 @@ class EcsStack {
       .replaceAll("{{database-port}}", `${database.cluster.port}`)
       .replaceAll("{{database-schema}}", `${database.cluster.databaseName}`);
 
+    const taskDefinitionName = `${name}-task-definition`;
     this.taskDefinition = new aws.ecsTaskDefinition.EcsTaskDefinition(
       scope,
       "EcsTaskDefinition",
       {
-        family: `${name}-task-definition`,
+        family: taskDefinitionName,
         requiresCompatibilities: ["FARGATE"],
         networkMode: "awsvpc",
         containerDefinitions,
         cpu: "256",
         memory: "512",
         executionRoleArn: this.executionRole.arn,
-        tags: {
-          Name: `${name}-task-definition`,
-          Stack: name,
-        },
         runtimePlatform: {
           operatingSystemFamily: "LINUX",
           cpuArchitecture: "ARM64",
         },
+        tags: { Name: taskDefinitionName, Stack: name },
       }
     );
 
+    const serviceName = `${name}-service`;
     this.service = new aws.ecsService.EcsService(scope, "EcsService", {
-      name: `${name}-service`,
+      name: serviceName,
       cluster: this.cluster.arn,
       taskDefinition: this.taskDefinition.arn,
       desiredCount: 1,
@@ -93,10 +89,7 @@ class EcsStack {
         subnets: network.publicSubnets.map((subnet) => subnet.id),
         assignPublicIp: true,
       },
-      tags: {
-        Name: `${name}-service`,
-        Stack: name,
-      },
+      tags: { Name: serviceName, Stack: name },
     });
   }
 }

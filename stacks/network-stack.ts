@@ -36,9 +36,7 @@ class NetworkStack {
         cidrBlock: `10.0.${index}.0/24`,
         vpcId: this.vpc.id,
         availabilityZone,
-        tags: {
-          Name: subnetName,
-        },
+        tags: { Name: subnetName },
       });
     });
 
@@ -54,9 +52,7 @@ class NetworkStack {
         cidrBlock: `10.0.${index + 16}.0/24`,
         vpcId: this.vpc.id,
         availabilityZone,
-        tags: {
-          Name: subnetName,
-        },
+        tags: { Name: subnetName },
       });
     });
     const igwName = `${name}-igw`;
@@ -65,9 +61,7 @@ class NetworkStack {
       "InternetGateway",
       {
         vpcId: this.vpc.id,
-        tags: {
-          Name: igwName,
-        },
+        tags: { Name: igwName },
       }
     );
     const publicRouteTable = new aws.routeTable.RouteTable(
