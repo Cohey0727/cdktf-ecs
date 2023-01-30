@@ -21,9 +21,11 @@
 
 ## Environment Variables
 
-| Name                     | Description                                |
-| ------------------------ | ------------------------------------------ |
-| APP_STAGE                | stage name(e.g. production, staging, ... ) |
-| DATABASE_MASTER_USER     | database username                          |
-| DATABASE_MASTER_PASSWORD | database password                          |
-| DATABASE_NAME            | database default schema                    |
+| Name                       | Description                              |
+| -------------------------- | ---------------------------------------- |
+| APP_STAGE                  | stage name(e.g. production, staging... ) |
+| DATABASE_MASTER_USER       | database master username                 |
+| DATABASE_MASTER_PASSWORD   | database master password                 |
+| DATABASE_NAME              | database default schema                  |
+| OPENSEARCH_MASTER_USER     | opensearch master username               |
+| OPENSEARCH_MASTER_PASSWORD | opensearch master password               |

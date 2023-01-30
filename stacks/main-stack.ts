@@ -7,6 +7,7 @@ import NetworkStack from "./network-stack";
 import EcsStack from "./ecs-stack";
 import EcrStack from "./ecr-stack";
 import DatabaseStack from "./database-stack";
+import OpenSearchStack from "./opensearch-stack";
 
 const s3 = aws.s3Bucket;
 
@@ -25,7 +26,10 @@ class MainStack extends TerraformStack {
     const network = new NetworkStack(this, name);
     const database = new DatabaseStack(this, name, { network });
     const ecr = new EcrStack(this, name, {});
+    // const opensearch = new OpenSearchStack(this, name, {});
+    // new EcsStack(this, name, { network, database, ecr, opensearch });
     new EcsStack(this, name, { network, database, ecr });
+
     createOutput(this, {
       aws_account_id: awsData.accountId,
       vpc_id: network.vpc.id,

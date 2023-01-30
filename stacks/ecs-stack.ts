@@ -4,11 +4,13 @@ import NetworkStack from "./network-stack";
 import * as aws from "@cdktf/provider-aws";
 import * as fs from "fs";
 import DatabaseStack from "./database-stack";
+import OpenSearchStack from "./opensearch-stack";
 
 type EcsStackProps = {
   network: NetworkStack;
   ecr: EcrStack;
   database: DatabaseStack;
+  // opensearch: OpenSearchStack;
 };
 
 class EcsStack {
@@ -46,6 +48,8 @@ class EcsStack {
       "LogGroup",
       { name: `/ecs/logs/${name}` }
     );
+    // const { masterUserName, masterUserPassword } =
+    //   opensearch.domain.advancedSecurityOptions.masterUserOptions;
     const containerDefinitions = fs
       .readFileSync("stacks/container-definitions.json", "utf8")
       .replaceAll("{{log-group}}", logGroup.name)
@@ -55,6 +59,9 @@ class EcsStack {
       .replaceAll("{{database-user}}", database.cluster.masterUsername)
       .replaceAll("{{database-port}}", `${database.cluster.port}`)
       .replaceAll("{{database-schema}}", `${database.cluster.databaseName}`);
+    // .replaceAll("{{opensearch-url}}", opensearch.domain.endpoint)
+    // .replaceAll("{{opensearch-user}}", `${masterUserName}`)
+    // .replaceAll("{{opensearch-password}}", `${masterUserPassword}`);
 
     const taskDefinitionName = `${name}-task-definition`;
     this.taskDefinition = new aws.ecsTaskDefinition.EcsTaskDefinition(

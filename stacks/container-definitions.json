@@ -40,6 +40,18 @@
       {
         "value": "{{database-schema}}",
         "name": "DATABASE_SCHEMA"
+      },
+      {
+        "value": "{{opensearch-url}}",
+        "name": "OPENSEARCH_URL"
+      },
+      {
+        "value": "{{opensearch-user}}",
+        "name": "OPENSEARCH_USER"
+      },
+      {
+        "value": "{{opensearch-password}}",
+        "name": "OPENSEARCH_PASSWORD"
       }
     ]
   }
