@@ -19,17 +19,19 @@ class OpenSearchStack {
         ebsOptions: {
           ebsEnabled: true,
           volumeType: "gp3",
-          volumeSize: 10,
+          volumeSize: 64,
         },
         clusterConfig: {
-          instanceType: "t3.small.search",
+          instanceType: "c6g.large.search",
           instanceCount: 2,
           zoneAwarenessEnabled: true,
           zoneAwarenessConfig: {
             availabilityZoneCount: 2,
           },
           warmEnabled: false,
-          dedicatedMasterEnabled: false,
+          dedicatedMasterEnabled: true,
+          dedicatedMasterCount: 3,
+          dedicatedMasterType: "c6g.large.search",
         },
         advancedOptions: {
           "rest.action.multi.allow_explicit_index": "true",
