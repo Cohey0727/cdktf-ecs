@@ -81,7 +81,7 @@ class EcsStack {
       .replaceAll("{{database-user}}", database.cluster.masterUsername)
       .replaceAll("{{database-port}}", `${database.cluster.port}`)
       .replaceAll("{{database-schema}}", `${database.cluster.databaseName}`)
-      .replaceAll("{{opensearch-url}}", opensearch.domain.endpoint)
+      .replaceAll("{{opensearch-url}}", `https://${opensearch.domain.endpoint}`)
       .replaceAll("{{opensearch-user}}", `${masterUserName}`)
       .replaceAll("{{opensearch-password}}", `${masterUserPassword}`);
 
