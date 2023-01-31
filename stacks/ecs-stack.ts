@@ -10,7 +10,7 @@ type EcsStackProps = {
   network: NetworkStack;
   ecr: EcrStack;
   database: DatabaseStack;
-  // opensearch: OpenSearchStack;
+  opensearch: OpenSearchStack;
 };
 
 class EcsStack {
@@ -22,7 +22,7 @@ class EcsStack {
 
   constructor(scope: TerraformStack, name: string, props: EcsStackProps) {
     this.scope = scope;
-    const { network, ecr, database } = props;
+    const { network, ecr, database, opensearch } = props;
 
     const clusterName = `${name}-cluster`;
     this.cluster = new aws.ecsCluster.EcsCluster(scope, "EcsCluster", {
@@ -48,8 +48,8 @@ class EcsStack {
       "LogGroup",
       { name: `/ecs/logs/${name}` }
     );
-    // const { masterUserName, masterUserPassword } =
-    //   opensearch.domain.advancedSecurityOptions.masterUserOptions;
+    const { masterUserName, masterUserPassword } =
+      opensearch.domain.advancedSecurityOptions.masterUserOptions;
     const containerDefinitions = fs
       .readFileSync("stacks/container-definitions.json", "utf8")
       .replaceAll("{{log-group}}", logGroup.name)
@@ -58,10 +58,10 @@ class EcsStack {
       .replaceAll("{{database-password}}", database.cluster.masterPassword)
       .replaceAll("{{database-user}}", database.cluster.masterUsername)
       .replaceAll("{{database-port}}", `${database.cluster.port}`)
-      .replaceAll("{{database-schema}}", `${database.cluster.databaseName}`);
-    // .replaceAll("{{opensearch-url}}", opensearch.domain.endpoint)
-    // .replaceAll("{{opensearch-user}}", `${masterUserName}`)
-    // .replaceAll("{{opensearch-password}}", `${masterUserPassword}`);
+      .replaceAll("{{database-schema}}", `${database.cluster.databaseName}`)
+      .replaceAll("{{opensearch-url}}", opensearch.domain.endpoint)
+      .replaceAll("{{opensearch-user}}", `${masterUserName}`)
+      .replaceAll("{{opensearch-password}}", `${masterUserPassword}`);
 
     const taskDefinitionName = `${name}-task-definition`;
     this.taskDefinition = new aws.ecsTaskDefinition.EcsTaskDefinition(

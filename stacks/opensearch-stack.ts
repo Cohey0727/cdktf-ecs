@@ -50,6 +50,11 @@ class OpenSearchStack {
             masterUserPassword: process.env.OPENSEARCH_MASTER_PASSWORD!,
           },
         },
+        timeouts: {
+          create: "2h",
+          delete: "2h",
+          update: "2h",
+        },
       }
     );
   }
