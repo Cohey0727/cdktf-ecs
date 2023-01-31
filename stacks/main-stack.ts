@@ -39,6 +39,7 @@ class MainStack extends TerraformStack {
         .map((subnet) => subnet.id)
         .join(","),
       ecr_repository_name: ecr.repository.name,
+      opensearch_endpoint: opensearch.domain.endpoint,
     });
   }
 }
