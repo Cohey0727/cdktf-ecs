@@ -17,8 +17,9 @@ class EcsStack {
   readonly scope: TerraformStack;
   readonly cluster: aws.ecsCluster.EcsCluster;
   readonly service: aws.ecsService.EcsService;
-  readonly executionRole: aws.iamRole.IamRole;
   readonly taskDefinition: aws.ecsTaskDefinition.EcsTaskDefinition;
+  readonly taskExecutionRole: aws.iamRole.IamRole;
+  readonly taskRole: aws.iamRole.IamRole;
 
   constructor(scope: TerraformStack, name: string, props: EcsStackProps) {
     this.scope = scope;
@@ -30,16 +31,37 @@ class EcsStack {
       tags: { Name: clusterName, Stack: name },
     });
 
-    const assumeRolePolicy = fs.readFileSync(
+    const executionAssumeRolePolicyDocument = fs.readFileSync(
       "stacks/task-execution-role-policy.json",
       "utf8"
     );
 
-    this.executionRole = new aws.iamRole.IamRole(scope, "TaskExecution", {
+    this.taskExecutionRole = new aws.iamRole.IamRole(scope, "TaskExecution", {
       name: `${name}-TaskExecution`,
-      assumeRolePolicy: assumeRolePolicy,
+      assumeRolePolicy: executionAssumeRolePolicyDocument,
       managedPolicyArns: [
         "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+      ],
+    });
+
+    const taskAssumeRolePolicyDocument = fs.readFileSync(
+      "stacks/task-role-assume-policy.json",
+      "utf8"
+    );
+
+    const taskRolePolicyDocument = fs.readFileSync(
+      "stacks/task-role-policy.json",
+      "utf8"
+    );
+
+    this.taskRole = new aws.iamRole.IamRole(scope, "TaskRole", {
+      name: `${name}-TaskRole`,
+      assumeRolePolicy: taskAssumeRolePolicyDocument,
+      inlinePolicy: [
+        {
+          name: `${name}-TaskRolePolicy`,
+          policy: taskRolePolicyDocument,
+        },
       ],
     });
 
@@ -74,7 +96,8 @@ class EcsStack {
         containerDefinitions,
         cpu: "256",
         memory: "512",
-        executionRoleArn: this.executionRole.arn,
+        executionRoleArn: this.taskExecutionRole.arn,
+        taskRoleArn: this.taskRole.arn,
         runtimePlatform: {
           operatingSystemFamily: "LINUX",
           cpuArchitecture: "ARM64",
@@ -92,6 +115,7 @@ class EcsStack {
       launchType: "FARGATE",
       deploymentMaximumPercent: 100,
       deploymentMinimumHealthyPercent: 0,
+      enableExecuteCommand: true,
       networkConfiguration: {
         subnets: network.publicSubnets.map((subnet) => subnet.id),
         assignPublicIp: true,
