@@ -28,6 +28,7 @@ class EcsStack {
     const clusterName = `${name}-cluster`;
     this.cluster = new aws.ecsCluster.EcsCluster(scope, "EcsCluster", {
       name: clusterName,
+      setting: [{ name: "containerInsights", value: "enabled" }],
       tags: { Name: clusterName, Stack: name },
     });
 

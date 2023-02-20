@@ -7,5 +7,5 @@ if (!stageName) {
 }
 
 const app = new App();
-new MainStack(app, `${stageName}-ecs`);
+new MainStack(app, `${stageName}-cdktf`);
 app.synth();
