@@ -8,6 +8,7 @@ import EcsStack from "./ecs-stack";
 import EcrStack from "./ecr-stack";
 import DatabaseStack from "./database-stack";
 import OpenSearchStack from "./opensearch-stack";
+import NotificationStack from "./notification-stack";
 
 const s3 = aws.s3Bucket;
 
@@ -27,17 +28,14 @@ class MainStack extends TerraformStack {
     const database = new DatabaseStack(this, name, { network });
     const ecr = new EcrStack(this, name, {});
     const opensearch = new OpenSearchStack(this, name, {});
-    new EcsStack(this, name, { network, database, ecr, opensearch });
+    const ecs = new EcsStack(this, name, { network, database, ecr, opensearch });
+    new NotificationStack(this, name, { ecs });
 
     createOutput(this, {
       aws_account_id: awsData.accountId,
       vpc_id: network.vpc.id,
-      private_subnet_ids: network.privateSubnets
-        .map((subnet) => subnet.id)
-        .join(","),
-      public_subnet_ids: network.publicSubnets
-        .map((subnet) => subnet.id)
-        .join(","),
+      private_subnet_ids: network.privateSubnets.map((subnet) => subnet.id).join(","),
+      public_subnet_ids: network.publicSubnets.map((subnet) => subnet.id).join(","),
       ecr_repository_name: ecr.repository.name,
       opensearch_endpoint: opensearch.domain.endpoint,
     });
