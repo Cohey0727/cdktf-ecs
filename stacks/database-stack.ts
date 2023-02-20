@@ -11,7 +11,7 @@ class DatabaseStack {
   readonly cluster: aws.rdsCluster.RdsCluster;
   readonly parameterGroup: aws.rdsClusterParameterGroup.RdsClusterParameterGroup;
   static readonly databaseEngin = "aurora-mysql";
-  static readonly engineVersion = "5.7.mysql_aurora.2.10.2";
+  static readonly engineVersion = "5.7.mysql_aurora.2.10.3";
 
   constructor(scope: TerraformStack, name: string, props: DatabaseStackProps) {
     this.scope = scope;
