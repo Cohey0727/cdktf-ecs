@@ -5,6 +5,7 @@ import EcsStack from "./ecs-stack";
 
 type NotificationStackProps = {
   ecs: EcsStack;
+  awsData: aws.dataAwsCallerIdentity.DataAwsCallerIdentity;
 };
 
 class NotificationStack {
@@ -12,18 +13,24 @@ class NotificationStack {
   readonly ecsTopic: aws.snsTopic.SnsTopic;
   constructor(scope: TerraformStack, name: string, props: NotificationStackProps) {
     this.scope = scope;
-    const { ecs } = props;
+    const { ecs, awsData } = props;
 
     const ecsTopicName = `${name}-ecs-topic`;
+    const accessPolicy = fs
+      .readFileSync("stacks/sns-access-policy.json", "utf8")
+      .replaceAll("{{aws-account-id}}", awsData.accountId)
+      .replaceAll("{{topic-name}}", ecsTopicName);
+
     this.ecsTopic = new aws.snsTopic.SnsTopic(this.scope, "SnsEcsTopic", {
       name: ecsTopicName,
+      policy: accessPolicy,
       tags: { Name: ecsTopicName },
     });
 
     const ecsEventBridgeName = `${name}-ecs-event-bridge`;
     const eventBridgePattern = fs
       .readFileSync("stacks/event-bridge.json", "utf8")
-      .replace("{{cluster-arn}}", ecs.cluster.arn);
+      .replaceAll("{{cluster-arn}}", ecs.cluster.arn);
 
     const eventRule = new aws.cloudwatchEventRule.CloudwatchEventRule(this.scope, "EcsEventRule", {
       name: ecsEventBridgeName,

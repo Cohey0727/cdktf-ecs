@@ -29,7 +29,7 @@ class MainStack extends TerraformStack {
     const ecr = new EcrStack(this, name, {});
     const opensearch = new OpenSearchStack(this, name, {});
     const ecs = new EcsStack(this, name, { network, database, ecr, opensearch });
-    new NotificationStack(this, name, { ecs });
+    new NotificationStack(this, name, { ecs, awsData });
 
     createOutput(this, {
       aws_account_id: awsData.accountId,
