@@ -10,11 +10,7 @@ type NotificationStackProps = {
 class NotificationStack {
   readonly scope: TerraformStack;
   readonly ecsTopic: aws.snsTopic.SnsTopic;
-  constructor(
-    scope: TerraformStack,
-    name: string,
-    props: NotificationStackProps
-  ) {
+  constructor(scope: TerraformStack, name: string, props: NotificationStackProps) {
     this.scope = scope;
     const { ecs } = props;
 
@@ -29,14 +25,14 @@ class NotificationStack {
       .readFileSync("stacks/event-bridge.json", "utf8")
       .replace("{{cluster-arn}}", ecs.cluster.arn);
 
-    new aws.cloudwatchEventRule.CloudwatchEventRule(
-      this.scope,
-      "EcsEventRule",
-      {
-        name: ecsEventBridgeName,
-        eventPattern: eventBridgePattern,
-      }
-    );
+    const eventRule = new aws.cloudwatchEventRule.CloudwatchEventRule(this.scope, "EcsEventRule", {
+      name: ecsEventBridgeName,
+      eventPattern: eventBridgePattern,
+    });
+    new aws.cloudwatchEventTarget.CloudwatchEventTarget(this.scope, "EcsTarget", {
+      rule: eventRule.name,
+      arn: this.ecsTopic.arn,
+    });
   }
 }
 
