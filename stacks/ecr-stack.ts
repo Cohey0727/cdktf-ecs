@@ -10,19 +10,15 @@ class EcrStack {
     this.scope = scope;
 
     const repositoryName = `${name}-repository`;
-    this.repository = new aws.ecrRepository.EcrRepository(
-      this.scope,
-      "EcrRepository",
-      {
-        name: repositoryName,
-        imageTagMutability: "MUTABLE",
-        imageScanningConfiguration: { scanOnPush: true },
-        tags: {
-          Name: repositoryName,
-          Stack: name,
-        },
-      }
-    );
+    this.repository = new aws.ecrRepository.EcrRepository(this.scope, "EcrRepository", {
+      name: repositoryName,
+      imageTagMutability: "MUTABLE",
+      imageScanningConfiguration: { scanOnPush: true },
+      tags: {
+        Name: repositoryName,
+        Stack: name,
+      },
+    });
   }
 }
 

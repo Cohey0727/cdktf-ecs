@@ -16,62 +16,53 @@ class DatabaseStack {
   constructor(scope: TerraformStack, name: string, props: DatabaseStackProps) {
     this.scope = scope;
     const { network } = props;
-    const dbSubnetGroup = new aws.dbSubnetGroup.DbSubnetGroup(
-      this.scope,
-      "DbSubnetGroup",
-      {
-        name: `${name}-subnet-group`,
-        subnetIds: network.publicSubnets.map((subnet) => subnet.id),
-        tags: {
-          Name: `${name}-subnet-group`,
-          Stack: name,
-        },
-      }
-    );
+    const dbSubnetGroup = new aws.dbSubnetGroup.DbSubnetGroup(this.scope, "DbSubnetGroup", {
+      name: `${name}-subnet-group`,
+      subnetIds: network.publicSubnets.map((subnet) => subnet.id),
+      tags: {
+        Name: `${name}-subnet-group`,
+        Stack: name,
+      },
+    });
 
-    const dbSecurityGroup = new aws.securityGroup.SecurityGroup(
-      this.scope,
-      "DbSecurityGroup",
-      {
-        name: `${name}-security-group`,
-        vpcId: network.vpc.id,
-        ingress: [
-          {
-            fromPort: 0,
-            toPort: 65535,
-            protocol: "tcp",
-            cidrBlocks: ["0.0.0.0/0"],
-          },
-        ],
-        tags: {
-          Name: `${name}-security-group`,
-          Stack: name,
+    const dbSecurityGroup = new aws.securityGroup.SecurityGroup(this.scope, "DbSecurityGroup", {
+      name: `${name}-security-group`,
+      vpcId: network.vpc.id,
+      ingress: [
+        {
+          fromPort: 0,
+          toPort: 65535,
+          protocol: "tcp",
+          cidrBlocks: ["0.0.0.0/0"],
         },
-      }
-    );
+      ],
+      tags: {
+        Name: `${name}-security-group`,
+        Stack: name,
+      },
+    });
 
     const clusterIdentifier = `${name}-cluster`;
-    this.parameterGroup =
-      new aws.rdsClusterParameterGroup.RdsClusterParameterGroup(
-        scope,
-        "ClusterParameterGroup",
-        {
-          name: `${name}-cluster-parameter-group`,
-          family: "aurora-mysql5.7",
-          parameter: [
-            {
-              name: "binlog_format",
-              value: "ROW",
-              applyMethod: "pending-reboot",
-            },
-            {
-              name: "binlog_checksum",
-              value: "NONE",
-              applyMethod: "pending-reboot",
-            },
-          ],
-        }
-      );
+    this.parameterGroup = new aws.rdsClusterParameterGroup.RdsClusterParameterGroup(
+      scope,
+      "ClusterParameterGroup",
+      {
+        name: `${name}-cluster-parameter-group`,
+        family: "aurora-mysql5.7",
+        parameter: [
+          {
+            name: "binlog_format",
+            value: "ROW",
+            applyMethod: "pending-reboot",
+          },
+          {
+            name: "binlog_checksum",
+            value: "NONE",
+            applyMethod: "pending-reboot",
+          },
+        ],
+      }
+    );
 
     this.cluster = new aws.rdsCluster.RdsCluster(this.scope, "RdsCluster", {
       clusterIdentifier,
@@ -89,18 +80,14 @@ class DatabaseStack {
       tags: { Name: clusterIdentifier, Stack: name },
     });
 
-    new aws.rdsClusterInstance.RdsClusterInstance(
-      this.scope,
-      "RdsClusterInstance",
-      {
-        identifier: `${name}-cluster-instance`,
-        clusterIdentifier: this.cluster.clusterIdentifier,
-        engine: DatabaseStack.databaseEngin,
-        instanceClass: "db.t3.small",
-        publiclyAccessible: true,
-        dbParameterGroupName: "default.aurora-mysql5.7",
-      }
-    );
+    new aws.rdsClusterInstance.RdsClusterInstance(this.scope, "RdsClusterInstance", {
+      identifier: `${name}-cluster-instance`,
+      clusterIdentifier: this.cluster.clusterIdentifier,
+      engine: DatabaseStack.databaseEngin,
+      instanceClass: "db.t3.small",
+      publiclyAccessible: true,
+      dbParameterGroupName: "default.aurora-mysql5.7",
+    });
   }
 }
 

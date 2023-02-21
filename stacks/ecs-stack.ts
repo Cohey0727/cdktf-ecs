@@ -40,9 +40,7 @@ class EcsStack {
     this.taskExecutionRole = new aws.iamRole.IamRole(scope, "TaskExecution", {
       name: `${name}-TaskExecution`,
       assumeRolePolicy: executionAssumeRolePolicyDocument,
-      managedPolicyArns: [
-        "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
-      ],
+      managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
     });
 
     const taskAssumeRolePolicyDocument = fs.readFileSync(
@@ -50,10 +48,7 @@ class EcsStack {
       "utf8"
     );
 
-    const taskRolePolicyDocument = fs.readFileSync(
-      "stacks/task-role-policy.json",
-      "utf8"
-    );
+    const taskRolePolicyDocument = fs.readFileSync("stacks/task-role-policy.json", "utf8");
 
     this.taskRole = new aws.iamRole.IamRole(scope, "TaskRole", {
       name: `${name}-TaskRole`,
@@ -66,11 +61,9 @@ class EcsStack {
       ],
     });
 
-    const logGroup = new aws.cloudwatchLogGroup.CloudwatchLogGroup(
-      scope,
-      "LogGroup",
-      { name: `/ecs/logs/${name}` }
-    );
+    const logGroup = new aws.cloudwatchLogGroup.CloudwatchLogGroup(scope, "LogGroup", {
+      name: `/ecs/logs/${name}`,
+    });
     const { masterUserName, masterUserPassword } =
       opensearch.domain.advancedSecurityOptions.masterUserOptions;
     const containerDefinitions = fs
@@ -87,25 +80,21 @@ class EcsStack {
       .replaceAll("{{opensearch-password}}", `${masterUserPassword}`);
 
     const taskDefinitionName = `${name}-task-definition`;
-    this.taskDefinition = new aws.ecsTaskDefinition.EcsTaskDefinition(
-      scope,
-      "EcsTaskDefinition",
-      {
-        family: taskDefinitionName,
-        requiresCompatibilities: ["FARGATE"],
-        networkMode: "awsvpc",
-        containerDefinitions,
-        cpu: "256",
-        memory: "512",
-        executionRoleArn: this.taskExecutionRole.arn,
-        taskRoleArn: this.taskRole.arn,
-        runtimePlatform: {
-          operatingSystemFamily: "LINUX",
-          cpuArchitecture: "ARM64",
-        },
-        tags: { Name: taskDefinitionName, Stack: name },
-      }
-    );
+    this.taskDefinition = new aws.ecsTaskDefinition.EcsTaskDefinition(scope, "EcsTaskDefinition", {
+      family: taskDefinitionName,
+      requiresCompatibilities: ["FARGATE"],
+      networkMode: "awsvpc",
+      containerDefinitions,
+      cpu: "256",
+      memory: "512",
+      executionRoleArn: this.taskExecutionRole.arn,
+      taskRoleArn: this.taskRole.arn,
+      runtimePlatform: {
+        operatingSystemFamily: "LINUX",
+        cpuArchitecture: "ARM64",
+      },
+      tags: { Name: taskDefinitionName, Stack: name },
+    });
 
     const serviceName = `${name}-service`;
     this.service = new aws.ecsService.EcsService(scope, "EcsService", {
